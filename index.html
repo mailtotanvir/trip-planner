@@ -4,221 +4,663 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Road Master v16 — Northern Ontario Trip Planner</title>
-<meta name="description" content="7-day Northern Ontario road trip planner: Jul 26 – Aug 1. Mississauga → SSM → Marathon → Thunder Bay → Home.">
+<title>Road Master v17 — Northern Ontario Trip</title>
 <style>
-    :root { --bg: #121212; --surface: #1e1e1e; --primary: #8ab4f8; --secondary: #81c995; --text: #e8eaed; --muted: #9aa0a6; --prayer: #4db6ac; --fuel: #ffb74d; --fee: #f28b82; --alert: #ff5252; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 10px; margin: 0; line-height: 1.4; }
-    .app-container { max-width: 500px; margin: auto; padding-bottom: 40px; }
-    h1 { color: var(--primary); font-size: 1.1rem; text-align: center; margin: 15px 0; text-transform: uppercase; border: 1px solid var(--primary); padding: 5px; border-radius: 4px; letter-spacing: 1px; }
-    .card { background: var(--surface); border-radius: 12px; margin-bottom: 12px; border-top: 4px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
-    .card[open] summary { border-bottom: 1px solid #333; margin-bottom: 10px; padding-bottom: 8px; }
-    summary { padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; list-style: none; font-size: 1rem; font-weight: bold; color: var(--primary); outline: none; }
-    summary::-webkit-details-marker { display: none; }
-    summary::after { content: '▼'; font-size: 0.8rem; color: var(--muted); transition: transform 0.2s ease; }
-    .card[open] summary::after { transform: rotate(180deg); }
-    .card-content { padding: 0 16px 16px 16px; }
-    .mission { font-size: 0.8rem; color: var(--secondary); font-style: italic; display: block; margin-bottom: 10px; }
-    .status-row { display: flex; align-items: flex-start; gap: 8px; margin: 12px 0; font-size: 0.82rem; cursor: pointer; transition: opacity 0.2s; }
-    .status-row:hover { opacity: 0.8; }
-    input[type="checkbox"] { accent-color: var(--secondary); width: 16px; height: 16px; margin-top: 2px; cursor: pointer; flex-shrink: 0; }
-    .status-row.checked .label { text-decoration: line-through; color: var(--muted); }
-    .status-row.checked .time { color: var(--muted); }
-    .time { font-weight: bold; color: var(--primary); min-width: 45px; }
-    .label { flex-grow: 1; line-height: 1.3; }
-    .label a { color: var(--primary); text-decoration: none; font-weight: 500; border-bottom: 1px dotted #555; }
-    .badge { font-size: 0.55rem; padding: 2px 5px; border-radius: 4px; color: #000; font-weight: 800; text-transform: uppercase; white-space: nowrap; margin-left: 5px; }
-    .bg-prayer { background: var(--prayer); } .bg-fuel { background: var(--fuel); } .bg-fee { background: var(--fee); } .bg-alert { background: var(--alert); color: #fff !important; }
-    .btn-nav { background: var(--primary); color: #000 !important; padding: 8px 14px; border-radius: 20px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-size: 0.75rem; font-weight: bold; margin-bottom: 12px; }
-    .dinner-box { font-size: 0.75rem; color: var(--muted); background: #252525; padding: 10px; border-radius: 6px; margin-top: 8px; border-left: 3px solid var(--secondary); }
-    .dinner-box a { color: var(--primary); text-decoration: none; font-weight: bold; border-bottom: 1px dotted #555; }
-    .warning-banner { background: rgba(255,82,82,0.1); border: 1px solid var(--alert); padding: 10px; border-radius: 8px; font-size: 0.75rem; margin-bottom: 15px; color: #ff8a80; }
-    .drive-time { display: block; font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
-    .highlight-row { background: #2d3a3a; padding: 5px; border-radius: 4px; }
+:root {
+  --bg:#0d0d0d; --surface:#1a1a1a; --primary:#8ab4f8;
+  --secondary:#81c995; --text:#e8eaed; --muted:#7a8087;
+  --prayer:#4db6ac; --fuel:#ffb74d; --fee:#f28b82; --alert:#ff5252;
+  --nav-h:56px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);color:var(--text);margin:0;line-height:1.4;
+  padding-bottom:calc(var(--nav-h) + 8px)}
+a{color:var(--primary)}
+input,select,button{font-family:inherit}
+input:focus,select:focus{outline:2px solid var(--primary);outline-offset:1px}
+
+/* BOTTOM NAV */
+#bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);
+  background:#111;border-top:1px solid #1e1e1e;display:flex;z-index:100}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:3px;background:none;border:none;color:var(--muted);
+  cursor:pointer;font-size:.62rem;border-top:2px solid transparent;transition:all .15s;padding:0}
+.nav-btn.active{color:var(--primary);border-top-color:var(--primary)}
+.nav-btn .icon{font-size:1.3rem;line-height:1}
+
+.tab{display:none}.tab.active{display:block}
+
+/* ── PLANNER ── */
+#planner{padding:10px 10px 0}
+.app-container{max-width:500px;margin:auto}
+.rm-title{color:var(--primary);font-size:1.1rem;text-align:center;margin:12px 0;
+  text-transform:uppercase;border:1px solid var(--primary);padding:5px;
+  border-radius:4px;letter-spacing:1px}
+.warning-banner{background:rgba(255,82,82,.1);border:1px solid var(--alert);
+  padding:10px;border-radius:8px;font-size:.75rem;margin-bottom:12px;color:#ff8a80}
+.card{background:var(--surface);border-radius:12px;margin-bottom:10px;
+  border-top:4px solid var(--primary);box-shadow:0 4px 10px rgba(0,0,0,.4)}
+.card[open] summary{border-bottom:1px solid #2a2a2a;margin-bottom:8px;padding-bottom:8px}
+summary{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;
+  cursor:pointer;list-style:none;font-size:.92rem;font-weight:bold;
+  color:var(--primary);outline:none;gap:8px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'▼';font-size:.7rem;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.card[open] summary::after{transform:rotate(180deg)}
+.card-content{padding:0 14px 14px}
+.mission{font-size:.78rem;color:var(--secondary);font-style:italic;display:block;margin-bottom:10px}
+.status-row{display:flex;align-items:flex-start;gap:8px;margin:10px 0;font-size:.8rem;cursor:pointer;transition:opacity .2s}
+.status-row:hover{opacity:.8}
+input[type="checkbox"]{accent-color:var(--secondary);width:16px;height:16px;margin-top:2px;cursor:pointer;flex-shrink:0}
+.status-row.checked .label{text-decoration:line-through;color:var(--muted)}
+.status-row.checked .time{color:var(--muted)}
+.time{font-weight:bold;color:var(--primary);min-width:44px}
+.label{flex-grow:1;line-height:1.35}
+.label a{color:var(--primary);text-decoration:none;font-weight:500;border-bottom:1px dotted #555}
+.badge{font-size:.52rem;padding:2px 5px;border-radius:4px;color:#000;font-weight:800;
+  text-transform:uppercase;white-space:nowrap;margin-left:4px}
+.bg-prayer{background:var(--prayer)}.bg-fuel{background:var(--fuel)}
+.bg-fee{background:var(--fee)}.bg-alert{background:var(--alert);color:#fff!important}
+.btn-nav{background:var(--primary);color:#000!important;padding:7px 13px;border-radius:20px;
+  text-decoration:none;display:inline-flex;align-items:center;gap:5px;
+  font-size:.72rem;font-weight:bold;margin-bottom:10px}
+.dinner-box{font-size:.73rem;color:var(--muted);background:#1e1e1e;padding:10px;
+  border-radius:6px;margin-top:8px;border-left:3px solid var(--secondary)}
+.dinner-box a{color:var(--primary);text-decoration:none;font-weight:bold;border-bottom:1px dotted #555}
+.drive-time{display:block;font-size:.63rem;color:var(--muted);margin-top:2px}
+.highlight-row{background:#1e2e2e;padding:5px;border-radius:4px}
+
+/* ── EXPENSES ── */
+#expenses{max-width:500px;margin:auto}
+.exp-header{background:linear-gradient(135deg,#131320,#0d0d0d);
+  border-bottom:1px solid #1e1e1e;padding:14px 14px 10px;position:sticky;top:0;z-index:40}
+.exp-header-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.exp-lbl{font-size:.58rem;color:#444;text-transform:uppercase;letter-spacing:2px;margin-bottom:2px}
+.exp-title{font-size:1rem;font-weight:bold;color:var(--primary)}
+.exp-remaining{font-size:1.15rem;font-weight:bold;text-align:right}
+.exp-subtabs{display:flex;background:#0d0d0d;border-bottom:1px solid #1a1a1a;
+  position:sticky;top:90px;z-index:39}
+.exp-stab{flex:1;padding:9px 4px;background:none;border:none;
+  border-bottom:2px solid transparent;color:#444;font-size:.67rem;
+  cursor:pointer;transition:all .2s;font-family:inherit}
+.exp-stab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.exp-body{padding:12px 14px}
+.sec-lbl{font-size:.58rem;color:#333;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
+
+/* gauges */
+.gauge-wrap{margin-bottom:10px}
+.gauge-row{display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:3px}
+.gauge-track{height:6px;background:#1e1e1e;border-radius:4px;overflow:hidden}
+.gauge-fill{height:100%;border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+/* day bars */
+.day-bars{display:flex;gap:4px;align-items:flex-end;height:64px;margin-top:8px}
+.day-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+.day-bar{width:100%;border-radius:3px 3px 0 0;min-height:3px;transition:height .4s ease}
+.day-bar-lbl{font-size:.5rem;color:#444}
+.day-bar-amt{font-size:.48rem;color:var(--primary)}
+
+/* receipt camera area */
+.receipt-area{position:relative;border-radius:12px;overflow:hidden;
+  margin-bottom:14px;background:#0f0f0f;border:1px solid #1e1e1e}
+.receipt-preview{width:100%;max-height:180px;object-fit:cover;display:block}
+.receipt-placeholder{padding:20px 16px;text-align:center}
+.receipt-placeholder .rp-icon{font-size:2rem;margin-bottom:6px}
+.receipt-placeholder .rp-title{font-size:.78rem;color:var(--muted)}
+.receipt-placeholder .rp-hint{font-size:.65rem;color:#333;margin-top:4px;line-height:1.5}
+.receipt-actions{display:flex;gap:8px;padding:10px}
+.rcam-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:9px;border-radius:8px;border:1px solid #252525;background:#141414;
+  color:var(--primary);font-size:.72rem;cursor:pointer;font-weight:500}
+.rcam-btn:active{opacity:.7}
+.ios-hint{font-size:.62rem;color:#333;text-align:center;padding:0 14px 10px;line-height:1.5}
+
+/* form */
+.field-lbl{font-size:.58rem;color:#444;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px}
+.field{width:100%;background:#141414;border:1px solid #252525;border-radius:8px;
+  color:var(--text);padding:9px 10px;font-size:.78rem}
+.cat-pills{display:flex;gap:5px;flex-wrap:wrap}
+.cat-pill{padding:5px 10px;border-radius:20px;border:1px solid #252525;
+  background:transparent;color:#444;font-size:.66rem;cursor:pointer;transition:all .15s}
+.add-btn{width:100%;padding:12px;background:var(--primary);border:none;border-radius:10px;
+  color:#000;font-weight:bold;font-size:.88rem;cursor:pointer;margin-top:6px}
+.add-btn:disabled{opacity:.35;cursor:not-allowed}
+
+/* expense items */
+.exp-item{display:flex;justify-content:space-between;align-items:center;
+  padding:9px 11px;background:#111;border-radius:10px;margin-bottom:7px}
+.exp-info{flex:1;min-width:0;margin-right:8px}
+.exp-desc{font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exp-meta{font-size:.6rem;color:#333;margin-top:1px}
+.exp-right{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.exp-amt{font-weight:bold;font-size:.85rem;white-space:nowrap}
+.del-btn{background:none;border:1px solid #252525;color:#444;border-radius:6px;
+  padding:3px 7px;cursor:pointer;font-size:.62rem}
+.empty{text-align:center;padding:36px 20px;color:#2a2a2a;
+  border:1px dashed #1a1a1a;border-radius:12px}
 </style>
 </head>
 <body>
+
+<!-- ═══════════════════ PLANNER ═══════════════════ -->
+<div id="planner" class="tab active">
 <div class="app-container">
+  <h1 class="rm-title">🗺️ Road Master v17</h1>
+  <div class="warning-banner">⚠️ <strong>CRITICAL:</strong> No cell service SSM → Wawa. <strong>Download Offline Maps</strong> before Day 2.</div>
 
-    <h1>🗺️ Road Master v16.2</h1>
-
-    <div class="warning-banner">
-        ⚠️ <strong>CRITICAL:</strong> No cell service between Sault Ste. Marie and Wawa. <strong>Download Offline Maps</strong> on Google Maps before Day 2.
+  <details class="card" style="border-top-color:var(--secondary)" open>
+    <summary>💰 Budget &amp; Logistics</summary>
+    <div class="card-content">
+      <div class="dinner-box" style="border-left-color:var(--primary)">
+        📉 <strong>Target: $2,360</strong> (Lodging $1,200 | Fuel $350 | Food $600 | Parks $210)<br>
+        ⛽ <strong>Strategy:</strong> 2017 Corolla (550km range). Sudbury Costco vital.<br>
+        🎟️ <strong>Permits:</strong> Book at 7:00 AM exactly, 5 days prior.
+      </div>
+      <a href="https://reservations.ontarioparks.com/" target="_blank" class="btn-nav" style="margin-top:10px;background:var(--secondary)">🎟️ Ontario Parks Portal</a>
+      <a href="https://parks.canada.ca/voyage-travel/admission/particip" target="_blank" class="btn-nav" style="background:var(--secondary)">🇨🇦 Parks Canada Discovery</a>
     </div>
+  </details>
 
-    <!-- BUDGET -->
-    <details class="card" style="border-top-color: var(--secondary);" open>
-        <summary>💰 Budget & Logistics</summary>
-        <div class="card-content">
-            <div class="dinner-box" style="border-left-color: var(--primary);">
-                📉 <strong>Target: $2,360</strong> (Lodging: $1,200 | Fuel: $350 | Food: $600 | Parks: $210)<br>
-                ⛽ <strong>Strategy:</strong> 2017 Corolla (550km Range). Sudbury Costco is vital.<br>
-                🎟️ <strong>Booking:</strong> Book permits at 7:00 AM 5 days prior.
-            </div>
-            <a href="https://reservations.ontarioparks.com/" target="_blank" class="btn-nav" style="margin-top:12px; background:var(--secondary);">🎟️ Ontario Parks Portal</a>
-            <a href="https://parks.canada.ca/voyage-travel/admission/particip" target="_blank" class="btn-nav" style="margin-top:4px; background:var(--secondary);">🇨🇦 Parks Canada Discovery</a>
-        </div>
-    </details>
+  <details class="card">
+    <summary>Day 1: Jul 26 (Sun) — SSM</summary>
+    <div class="card-content">
+      <span class="mission">Mississauga → Sault Ste. Marie (6.5h driving)</span>
+      <a href="https://www.google.com/maps/dir/Mississauga,+ON/Killarney+Provincial+Park/Gros+Cap+Bluffs/Quattro+Hotel" target="_blank" class="btn-nav">🚀 START NAV</a>
+      <label class="status-row"><input type="checkbox"><span class="time">05:00</span><span class="label">Depart Home (Fajr) <span class="badge bg-prayer">PRAYER</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">09:00</span><span class="label">🌲 <a href="https://www.google.com/search?q=Killarney+Provincial+Park" target="_blank">Killarney Park</a> <span class="badge bg-fee">FEE</span><span class="drive-time">↳ 4h from home</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">13:45</span><span class="label">🤲 Dhuhr Prayer (On Route) <span class="badge bg-prayer">PRAYER</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">14:30</span><span class="label">⛰️ <a href="https://www.google.com/search?q=Gros+Cap+Bluffs" target="_blank">Gros Cap Bluffs</a></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">17:00</span><span class="label">🏨 <a href="https://www.google.com/search?q=Quattro+Hotel+Sault+Ste+Marie" target="_blank">Quattro Hotel</a> (ID: 72073050937171)</span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">17:40</span><span class="label">🤲 Asr Prayer (SSM) <span class="badge bg-prayer">PRAYER</span></span></label>
+      <div class="dinner-box">🍽️ <strong>SSM Halal:</strong> <a href="https://www.google.com/search?q=Georgie's+Shawarma+Sault+Ste+Marie" target="_blank">Georgie's</a> / <a href="https://www.google.com/search?q=Biryani+House+Halal+Sault+Ste+Marie" target="_blank">Biryani House</a></div>
+    </div>
+  </details>
 
-    <!-- DAY 1 -->
-    <details class="card">
-        <summary>Day 1: Jul 26 (Sun) — SSM</summary>
-        <div class="card-content">
-            <span class="mission">Mississauga → Sault Ste. Marie (6.5h driving)</span>
-            <a href="https://www.google.com/maps/dir/Mississauga,+ON/Killarney+Provincial+Park/Gros+Cap+Bluffs/Quattro+Hotel" target="_blank" class="btn-nav">🚀 START NAV</a>
-            <label class="status-row"><input type="checkbox"><span class="time">05:00</span><span class="label">Depart Home (Fajr) <span class="badge bg-prayer">PRAYER</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">09:00</span><span class="label">🌲 <a href="https://www.google.com/search?q=Killarney+Provincial+Park" target="_blank">Killarney Park</a> <span class="badge bg-fee">FEE</span><span class="drive-time">↳ 4h drive from home</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">13:45</span><span class="label">🤲 Dhuhr Prayer (On Route) <span class="badge bg-prayer">PRAYER</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">14:30</span><span class="label">⛰️ <a href="https://www.google.com/search?q=Gros+Cap+Bluffs" target="_blank">Gros Cap Bluffs</a></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">17:00</span><span class="label">🏨 <a href="https://www.google.com/search?q=Quattro+Hotel+Sault+Ste+Marie" target="_blank">Quattro Hotel</a> (ID: 72073050937171)</span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">17:40</span><span class="label">🤲 Asr Prayer (SSM) <span class="badge bg-prayer">PRAYER</span></span></label>
-            <div class="dinner-box">🍽️ <strong>SSM Halal:</strong> <a href="https://www.google.com/search?q=Georgie's+Shawarma+Sault+Ste+Marie" target="_blank">Georgie's</a> / <a href="https://www.google.com/search?q=Biryani+House+Halal+Sault+Ste+Marie" target="_blank">Biryani House</a>.</div>
-        </div>
-    </details>
+  <details class="card">
+    <summary>Day 2: Jul 27 (Mon) — Marathon</summary>
+    <div class="card-content">
+      <span class="mission">Into the Wild North Shore (4h driving)</span>
+      <a href="https://www.google.com/maps/dir/Quattro+Hotel/Pancake+Bay/Agawa+Bay/Sand+River+Falls/Katherine+Cove/Old+Woman+Bay/High+Falls/Pukaskwa+National+Park/Travelodge+by+Wyndham+Marathon" target="_blank" class="btn-nav">🚀 START NAV</a>
+      <label class="status-row"><input type="checkbox"><span class="time">07:00</span><span class="label">⛽ <a href="https://www.google.com/search?q=Pancake+Bay+Provincial+Park" target="_blank">Pancake Bay</a> Refuel <span class="badge bg-fuel">FUEL</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">08:00</span><span class="label">🌲 <a href="https://www.google.com/search?q=Agawa+Bay+Ontario" target="_blank">Agawa Bay</a> <span class="badge bg-fee">FEE</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">08:45</span><span class="label">🌊 <a href="https://www.google.com/search?q=Sand+River+Falls+Ontario" target="_blank">Sand River Falls</a></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">09:00</span><span class="label">🏖️ <a href="https://www.google.com/search?q=Katherine+Cove+Ontario" target="_blank">Katherine Cove</a></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">09:30</span><span class="label">📸 <a href="https://www.google.com/search?q=Old+Woman+Bay+Ontario" target="_blank">Old Woman Bay</a></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">10:00</span><span class="label">🏞️ <a href="https://www.google.com/search?q=High+Falls+Wawa" target="_blank">High Falls (Wawa)</a><span class="drive-time">↳ End of dead zone</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">12:30</span><span class="label">🌲 <a href="https://www.google.com/search?q=Pukaskwa+National+Park" target="_blank">Pukaskwa Park</a> <span class="badge bg-fee">FEE</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">13:45</span><span class="label">🤲 Dhuhr Prayer (Pukaskwa) <span class="badge bg-prayer">PRAYER</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">15:00</span><span class="label">🏨 <a href="https://www.google.com/search?q=Travelodge+by+Wyndham+Marathon" target="_blank">Travelodge Marathon</a> (ID: 72073400186129)</span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">16:00</span><span class="label">🌊 <a href="https://www.google.com/search?q=Mink+Creek+Falls" target="_blank">Mink Creek Falls</a></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">17:45</span><span class="label">🤲 Asr Prayer (Marathon) <span class="badge bg-prayer">PRAYER</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">21:00</span><span class="label">🌌 Maghrib/Isha Prayer <span class="badge bg-prayer">PRAYER</span></span></label>
+      <div class="dinner-box">🍽️ <strong>Marathon:</strong> Halal limited. Veg at <a href="https://www.google.com/search?q=Marathon+Pizza+Ontario" target="_blank">Marathon Pizza</a></div>
+    </div>
+  </details>
 
-    <!-- DAY 2 -->
-    <details class="card">
-        <summary>Day 2: Jul 27 (Mon) — Marathon</summary>
-        <div class="card-content">
-            <span class="mission">Into the Wild North Shore (4h driving)</span>
-            <a href="https://www.google.com/maps/dir/Quattro+Hotel/Pancake+Bay/Agawa+Bay/Sand+River+Falls/Katherine+Cove/Old+Woman+Bay/High+Falls/Pukaskwa+National+Park/Travelodge+by+Wyndham+Marathon" target="_blank" class="btn-nav">🚀 START NAV</a>
-            <label class="status-row"><input type="checkbox"><span class="time">07:00</span><span class="label">⛽ <a href="https://www.google.com/search?q=Pancake+Bay+Provincial+Park" target="_blank">Pancake Bay</a> Refuel <span class="badge bg-fuel">FUEL</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">08:00</span><span class="label">🌲 <a href="https://www.google.com/search?q=Agawa+Bay+Ontario" target="_blank">Agawa Bay</a> <span class="badge bg-fee">FEE</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">08:45</span><span class="label">🌊 <a href="https://www.google.com/search?q=Sand+River+Falls+Ontario" target="_blank">Sand River Falls</a></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">09:00</span><span class="label">🏖️ <a href="https://www.google.com/search?q=Katherine+Cove+Ontario" target="_blank">Katherine Cove</a></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">09:30</span><span class="label">📸 <a href="https://www.google.com/search?q=Old+Woman+Bay+Ontario" target="_blank">Old Woman Bay</a></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">10:00</span><span class="label">🏞️ <a href="https://www.google.com/search?q=High+Falls+Wawa" target="_blank">High Falls (Wawa)</a><span class="drive-time">↳ End of cellular dead zone</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">12:30</span><span class="label">🌲 <a href="https://www.google.com/search?q=Pukaskwa+National+Park" target="_blank">Pukaskwa Park</a> <span class="badge bg-fee">FEE</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">13:45</span><span class="label">🤲 Dhuhr Prayer (Pukaskwa) <span class="badge bg-prayer">PRAYER</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">15:00</span><span class="label">🏨 <a href="https://www.google.com/search?q=Travelodge+by+Wyndham+Marathon" target="_blank">Travelodge Marathon</a> (ID: 72073400186129)</span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">16:00</span><span class="label">🌊 <a href="https://www.google.com/search?q=Mink+Creek+Falls" target="_blank">Mink Creek Falls</a></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">17:45</span><span class="label">🤲 Asr Prayer (Marathon) <span class="badge bg-prayer">PRAYER</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">21:00</span><span class="label">🌌 Maghrib/Isha Prayer <span class="badge bg-prayer">PRAYER</span></span></label>
-            <div class="dinner-box">🍽️ <strong>Marathon:</strong> Halal limited. Veg recommended at <a href="https://www.google.com/search?q=Marathon+Pizza+Ontario" target="_blank">Marathon Pizza</a>.</div>
-        </div>
-    </details>
+  <details class="card">
+    <summary>Day 3: Jul 28 (Tue) — Thunder Bay</summary>
+    <div class="card-content">
+      <span class="mission">Deep North Landmarks (3.5h driving)</span>
+      <a href="https://www.google.com/maps/dir/Travelodge+Marathon/Sleeping+Giant/Ouimet+Canyon/Terry+Fox+Memorial/TownePlace+Suites+Thunder+Bay" target="_blank" class="btn-nav">🚀 START NAV</a>
+      <label class="status-row"><input type="checkbox"><span class="time">08:40</span><span class="label">⛰️ <a href="https://www.google.com/search?q=Sleeping+Giant+Provincial+Park" target="_blank">Sleeping Giant</a> <span class="badge bg-fee">FEE</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">09:40</span><span class="label">🕳️ <a href="https://www.google.com/search?q=Ouimet+Canyon" target="_blank">Ouimet Canyon</a></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">10:30</span><span class="label">🇨🇦 <a href="https://www.google.com/search?q=Terry+Fox+Memorial+Thunder+Bay" target="_blank">Terry Fox Memorial</a></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">11:00</span><span class="label">🏨 <a href="https://www.google.com/search?q=TownePlace+Suites+Thunder+Bay" target="_blank">TownePlace TB</a> (ID: 72073050883193)</span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">13:50</span><span class="label">🤲 Dhuhr Prayer (TB) <span class="badge bg-prayer">PRAYER</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">17:50</span><span class="label">🤲 Asr Prayer (TB) <span class="badge bg-prayer">PRAYER</span></span></label>
+      <div class="dinner-box">🍽️ <strong>TB Halal:</strong> <a href="https://www.google.com/search?q=Malabar+Mandi+Thunder+Bay" target="_blank">Malabar Mandi</a> / <a href="https://www.google.com/search?q=Monsoon+Indian+Thunder+Bay" target="_blank">Monsoon Indian</a></div>
+    </div>
+  </details>
 
-    <!-- DAY 3 -->
-    <details class="card">
-        <summary>Day 3: Jul 28 (Tue) — Thunder Bay</summary>
-        <div class="card-content">
-            <span class="mission">Deep North Landmarks (3.5h driving)</span>
-            <a href="https://www.google.com/maps/dir/Travelodge+Marathon/Sleeping+Giant/Ouimet+Canyon/Terry+Fox+Memorial/TownePlace+Suites+Thunder+Bay" target="_blank" class="btn-nav">🚀 START NAV</a>
-            <label class="status-row"><input type="checkbox"><span class="time">08:40</span><span class="label">⛰️ <a href="https://www.google.com/search?q=Sleeping+Giant+Provincial+Park" target="_blank">Sleeping Giant</a> <span class="badge bg-fee">FEE</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">09:40</span><span class="label">🕳️ <a href="https://www.google.com/search?q=Ouimet+Canyon" target="_blank">Ouimet Canyon</a></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">10:30</span><span class="label">🇨🇦 <a href="https://www.google.com/search?q=Terry+Fox+Memorial+Thunder+Bay" target="_blank">Terry Fox Memorial</a></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">11:00</span><span class="label">🏨 <a href="https://www.google.com/search?q=TownePlace+Suites+Thunder+Bay" target="_blank">TownePlace TB</a> (ID: 72073050883193)</span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">13:50</span><span class="label">🤲 Dhuhr Prayer (TB) <span class="badge bg-prayer">PRAYER</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">17:50</span><span class="label">🤲 Asr Prayer (TB) <span class="badge bg-prayer">PRAYER</span></span></label>
-            <div class="dinner-box">🍽️ <strong>TB Halal:</strong> <a href="https://www.google.com/search?q=Malabar+Mandi+Thunder+Bay" target="_blank">Malabar Mandi</a> / <a href="https://www.google.com/search?q=Monsoon+Indian+Thunder+Bay" target="_blank">Monsoon Indian</a>.</div>
-        </div>
-    </details>
+  <details class="card">
+    <summary>Day 4: Jul 29 (Wed) — Wilderness</summary>
+    <div class="card-content">
+      <span class="mission">Waterfalls &amp; Wilderness Core</span>
+      <a href="https://www.google.com/maps/dir/TownePlace+Suites+Thunder+Bay/Kakabeka+Falls/Quetico+Provincial+Park/Thunder+Bay+Masjid" target="_blank" class="btn-nav">🚀 START NAV</a>
+      <label class="status-row"><input type="checkbox"><span class="time">07:30</span><span class="label">🌊 <a href="https://www.google.com/search?q=Kakabeka+Falls" target="_blank">Kakabeka Falls</a> <span class="badge bg-fee">FEE</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">09:00</span><span class="label">🌲 <a href="https://www.google.com/search?q=Quetico+Provincial+Park" target="_blank">Quetico Provincial Park</a></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">13:55</span><span class="label">🤲 Dhuhr Prayer (Quetico) <span class="badge bg-prayer">PRAYER</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">17:50</span><span class="label">🤲 Asr Prayer (Return) <span class="badge bg-prayer">PRAYER</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">22:00</span><span class="label">🕌 <strong>Isha: <a href="https://www.google.com/search?q=Thunder+Bay+Masjid" target="_blank">TB Masjid</a></strong> <span class="badge bg-prayer">PRAYER</span></span></label>
+      <div class="dinner-box">🍽️ <strong>TB Halal:</strong> <a href="https://www.google.com/search?q=Famous+Tandoor+Thunder+Bay" target="_blank">Famous Tandoor</a> / <a href="https://www.google.com/search?q=Pita+Land+Thunder+Bay" target="_blank">Pita Land</a></div>
+    </div>
+  </details>
 
-    <!-- DAY 4 -->
-    <details class="card">
-        <summary>Day 4: Jul 29 (Wed) — Wilderness</summary>
-        <div class="card-content">
-            <span class="mission">Waterfalls & Wilderness Core</span>
-            <a href="https://www.google.com/maps/dir/TownePlace+Suites+Thunder+Bay/Kakabeka+Falls/Quetico+Provincial+Park/Thunder+Bay+Masjid" target="_blank" class="btn-nav">🚀 START NAV</a>
-            <label class="status-row"><input type="checkbox"><span class="time">07:30</span><span class="label">🌊 <a href="https://www.google.com/search?q=Kakabeka+Falls" target="_blank">Kakabeka Falls</a> <span class="badge bg-fee">FEE</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">09:00</span><span class="label">🌲 <a href="https://www.google.com/search?q=Quetico+Provincial+Park" target="_blank">Quetico Provincial Park</a></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">13:55</span><span class="label">🤲 Dhuhr Prayer (Quetico Area) <span class="badge bg-prayer">PRAYER</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">17:50</span><span class="label">🤲 Asr Prayer (Return Trip) <span class="badge bg-prayer">PRAYER</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">22:00</span><span class="label">🕌 <strong>Isha: <a href="https://www.google.com/search?q=Thunder+Bay+Masjid" target="_blank">TB Masjid</a></strong> <span class="badge bg-prayer">PRAYER</span></span></label>
-            <div class="dinner-box">🍽️ <strong>TB Halal:</strong> <a href="https://www.google.com/search?q=Famous+Tandoor+Thunder+Bay" target="_blank">Famous Tandoor</a> / <a href="https://www.google.com/search?q=Pita+Land+Thunder+Bay" target="_blank">Pita Land</a>.</div>
-        </div>
-    </details>
+  <details class="card">
+    <summary>Day 5: Jul 30 (Thu) — Peaks &amp; Falls</summary>
+    <div class="card-content">
+      <span class="mission">Peaks &amp; Falls Discovery</span>
+      <a href="https://www.google.com/maps/dir/TownePlace+Suites+Thunder+Bay/Silver+Falls+Provincial+Park/Mount+McKay+Lookout/Prince+Arthur's+Landing" target="_blank" class="btn-nav">🚀 START NAV</a>
+      <label class="status-row"><input type="checkbox"><span class="time">07:30</span><span class="label">🌊 <a href="https://www.google.com/search?q=Silver+Falls+Provincial+Park" target="_blank">Silver Falls Park</a></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">08:30</span><span class="label">🌊 <a href="https://www.google.com/search?q=Dog+Falls+Ontario" target="_blank">Dog Falls</a></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">10:00</span><span class="label">⛰️ <a href="https://www.google.com/search?q=Mount+McKay+Lookout" target="_blank">Mount McKay</a></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">11:00</span><span class="label">⛴️ <a href="https://www.google.com/search?q=Prince+Arthur's+Landing" target="_blank">Prince Arthur's Landing</a></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">13:55</span><span class="label">🤲 Dhuhr Prayer (TB) <span class="badge bg-prayer">PRAYER</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">17:50</span><span class="label">🤲 Asr Prayer (TB) <span class="badge bg-prayer">PRAYER</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">22:00</span><span class="label">🌌 Night Prayer TB <span class="badge bg-prayer">PRAYER</span></span></label>
+      <div class="dinner-box">🍽️ <strong>TB Halal:</strong> <a href="https://www.google.com/search?q=Osmow's+Shawarma+Thunder+Bay" target="_blank">Osmow's</a> / <a href="https://www.google.com/search?q=Exotic+Indian+Eats+Thunder+Bay" target="_blank">Exotic Indian Eats</a></div>
+    </div>
+  </details>
 
-    <!-- DAY 5 -->
-    <details class="card">
-        <summary>Day 5: Jul 30 (Thu) — Peaks & Falls</summary>
-        <div class="card-content">
-            <span class="mission">Peaks & Falls Discovery</span>
-            <a href="https://www.google.com/maps/dir/TownePlace+Suites+Thunder+Bay/Silver+Falls+Provincial+Park/Mount+McKay+Lookout/Prince+Arthur's+Landing" target="_blank" class="btn-nav">🚀 START NAV</a>
-            <label class="status-row"><input type="checkbox"><span class="time">07:30</span><span class="label">🌊 <a href="https://www.google.com/search?q=Silver+Falls+Provincial+Park" target="_blank">Silver Falls Park</a></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">08:30</span><span class="label">🌊 <a href="https://www.google.com/search?q=Dog+Falls+Ontario" target="_blank">Dog Falls</a></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">10:00</span><span class="label">⛰️ <a href="https://www.google.com/search?q=Mount+McKay+Lookout" target="_blank">Mount McKay</a></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">11:00</span><span class="label">⛴️ <a href="https://www.google.com/search?q=Prince+Arthur's+Landing" target="_blank">Prince Arthur's Landing</a></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">13:55</span><span class="label">🤲 Dhuhr Prayer (TB) <span class="badge bg-prayer">PRAYER</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">17:50</span><span class="label">🤲 Asr Prayer (TB) <span class="badge bg-prayer">PRAYER</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">22:00</span><span class="label">🌌 Night Prayer TB <span class="badge bg-prayer">PRAYER</span></span></label>
-            <div class="dinner-box">🍽️ <strong>TB Halal:</strong> <a href="https://www.google.com/search?q=Osmow's+Shawarma+Thunder+Bay" target="_blank">Osmow's Shawarma</a> / <a href="https://www.google.com/search?q=Exotic+Indian+Eats+Thunder+Bay" target="_blank">Exotic Indian Eats</a>.</div>
-        </div>
-    </details>
+  <details class="card" style="border-top-color:var(--prayer)">
+    <summary>Day 6: Jul 31 (Fri) — SSM Bound <span class="badge bg-prayer">JUMUAH</span></summary>
+    <div class="card-content">
+      <span class="mission">Home Bound via SSM (7h driving)</span>
+      <a href="https://www.google.com/maps/dir/TownePlace+Suites+Thunder+Bay/Pukaskwa+National+Park/Sault+Ste.+Marie+Masjid/Fairfield+Inn+and+Suites+by+Marriott+Sault+Ste.+Marie" target="_blank" class="btn-nav">🚀 START NAV</a>
+      <label class="status-row"><input type="checkbox"><span class="time">05:00</span><span class="label">Depart TB Early (Fajr) <span class="badge bg-prayer">PRAYER</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">08:30</span><span class="label">🌲 <a href="https://www.google.com/search?q=Pukaskwa+National+Park" target="_blank">Pukaskwa National Park</a> <span class="badge bg-fee">FEE</span><span class="drive-time">↳ ~3.5h from TB · brief stop to make Jumuah</span></span></label>
+      <label class="status-row highlight-row"><input type="checkbox"><span class="time">14:00</span><span class="label">🕌 <strong><a href="https://www.google.com/search?q=Sault+Ste+Marie+Masjid" target="_blank" style="color:var(--text);border:none">SSM Masjid</a></strong> (Jumuah) <span class="badge bg-alert">CRITICAL</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">15:30</span><span class="label">🏨 <a href="https://www.google.com/search?q=Fairfield+Inn+Sault+Ste+Marie" target="_blank">Fairfield Inn &amp; Suites</a> (ID: 72073734452984)</span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">17:40</span><span class="label">🤲 Asr Prayer (SSM) <span class="badge bg-prayer">PRAYER</span></span></label>
+      <div class="dinner-box">🍽️ <strong>SSM Halal:</strong> <a href="https://www.google.com/search?q=Tandoori+Gardan+Sault+Ste+Marie" target="_blank">Tandoori Gardan</a> / <a href="https://www.google.com/search?q=Soo+Shawarma+Sault+Ste+Marie" target="_blank">Soo Shawarma</a></div>
+    </div>
+  </details>
 
-    <!-- DAY 6 -->
-    <details class="card" style="border-top-color: var(--prayer);">
-        <summary>Day 6: Jul 31 (Fri) — SSM Bound <span class="badge bg-prayer">JUMUAH</span></summary>
-        <div class="card-content">
-            <span class="mission">Home Bound via SSM (7h driving)</span>
-            <a href="https://www.google.com/maps/dir/TownePlace+Suites+Thunder+Bay/Pukaskwa+National+Park/Sault+Ste.+Marie+Masjid/Fairfield+Inn+and+Suites+by+Marriott+Sault+Ste.+Marie" target="_blank" class="btn-nav">🚀 START NAV</a>
-            <label class="status-row"><input type="checkbox"><span class="time">05:00</span><span class="label">Depart TB Early (Fajr) <span class="badge bg-prayer">PRAYER</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">08:30</span><span class="label">🌲 <a href="https://www.google.com/search?q=Pukaskwa+National+Park" target="_blank">Pukaskwa National Park</a> <span class="badge bg-fee">FEE</span><span class="drive-time">↳ ~3.5h from TB · brief stop to make Jumuah</span></span></label>
-            <label class="status-row highlight-row"><input type="checkbox"><span class="time">14:00</span><span class="label">🕌 <strong><a href="https://www.google.com/search?q=Sault+Ste+Marie+Masjid" target="_blank" style="color:var(--text); border:none;">SSM Masjid</a></strong> (Jumuah / Dhuhr) <span class="badge bg-alert">CRITICAL</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">15:30</span><span class="label">🏨 <a href="https://www.google.com/search?q=Fairfield+Inn+and+Suites+by+Marriott+Sault+Ste+Marie" target="_blank">Fairfield Inn & Suites</a> (ID: 72073734452984)</span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">17:40</span><span class="label">🤲 Asr Prayer (SSM) <span class="badge bg-prayer">PRAYER</span></span></label>
-            <div class="dinner-box">🍽️ <strong>SSM Halal:</strong> <a href="https://www.google.com/search?q=Tandoori+Gardan+Sault+Ste+Marie" target="_blank">Tandoori Gardan</a> / <a href="https://www.google.com/search?q=Soo+Shawarma+Sault+Ste+Marie" target="_blank">Soo Shawarma</a>.</div>
-        </div>
-    </details>
-
-    <!-- DAY 7 -->
-    <details class="card" style="border-top-color: var(--fee);">
-        <summary>Day 7: Aug 1 (Sat) — Final Leg 🏠</summary>
-        <div class="card-content">
-            <span class="mission">Final Leg Home (6.5h driving)</span>
-            <a href="https://www.google.com/maps/dir/Fairfield+Inn+and+Suites+by+Marriott+Sault+Ste.+Marie/Costco+Wholesale+Sudbury/Mississauga,+ON" target="_blank" class="btn-nav">🚀 START NAV</a>
-            <label class="status-row"><input type="checkbox"><span class="time">05:00</span><span class="label">Fajr Prayer SSM <span class="badge bg-prayer">PRAYER</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">08:00</span><span class="label">⛽ Depart SSM (Final Fuel) <span class="badge bg-fuel">FUEL</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">11:00</span><span class="label">🛒 Sudbury Costco Refill</span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">13:45</span><span class="label">🤲 Dhuhr Prayer (Sudbury Area) <span class="badge bg-prayer">PRAYER</span></span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">16:00</span><span class="label">🏠 Arrive Mississauga</span></label>
-            <label class="status-row"><input type="checkbox"><span class="time">17:40</span><span class="label">🤲 Asr Prayer (Home / GTA) <span class="badge bg-prayer">PRAYER</span></span></label>
-            <div class="dinner-box">🍽️ <strong>Sudbury Halal:</strong> <a href="https://www.google.com/search?q=Hallalak+Sudbury" target="_blank">Hallalak</a> / <a href="https://www.google.com/search?q=Damascus+Restaurant+Sudbury" target="_blank">Damascus Restaurant</a>.</div>
-        </div>
-    </details>
-
+  <details class="card" style="border-top-color:var(--fee)">
+    <summary>Day 7: Aug 1 (Sat) — Final Leg 🏠</summary>
+    <div class="card-content">
+      <span class="mission">Final Leg Home (6.5h driving)</span>
+      <a href="https://www.google.com/maps/dir/Fairfield+Inn+and+Suites+by+Marriott+Sault+Ste.+Marie/Costco+Wholesale+Sudbury/Mississauga,+ON" target="_blank" class="btn-nav">🚀 START NAV</a>
+      <label class="status-row"><input type="checkbox"><span class="time">05:00</span><span class="label">Fajr Prayer SSM <span class="badge bg-prayer">PRAYER</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">08:00</span><span class="label">⛽ Depart SSM (Final Fuel) <span class="badge bg-fuel">FUEL</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">11:00</span><span class="label">🛒 Sudbury Costco Refill</span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">13:45</span><span class="label">🤲 Dhuhr Prayer (Sudbury) <span class="badge bg-prayer">PRAYER</span></span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">16:00</span><span class="label">🏠 Arrive Mississauga</span></label>
+      <label class="status-row"><input type="checkbox"><span class="time">17:40</span><span class="label">🤲 Asr Prayer (Home) <span class="badge bg-prayer">PRAYER</span></span></label>
+      <div class="dinner-box">🍽️ <strong>Sudbury Halal:</strong> <a href="https://www.google.com/search?q=Hallalak+Sudbury" target="_blank">Hallalak</a> / <a href="https://www.google.com/search?q=Damascus+Restaurant+Sudbury" target="_blank">Damascus Restaurant</a></div>
+    </div>
+  </details>
+</div>
 </div>
 
+<!-- ═══════════════════ EXPENSES ═══════════════════ -->
+<div id="expenses" class="tab">
+<div style="max-width:500px;margin:auto">
+
+  <div class="exp-header">
+    <div class="exp-header-top">
+      <div>
+        <div class="exp-lbl">Road Master</div>
+        <div class="exp-title">💰 Trip Expenses</div>
+      </div>
+      <div>
+        <div class="exp-lbl" style="text-align:right">Remaining</div>
+        <div class="exp-remaining" id="hdr-rem">$2,360.00</div>
+      </div>
+    </div>
+    <div style="font-size:.62rem;color:#333;display:flex;justify-content:space-between;margin-bottom:3px">
+      <span id="hdr-spent">Spent: $0.00</span><span>Budget: $2,360.00</span>
+    </div>
+    <div class="gauge-track" style="height:8px">
+      <div class="gauge-fill" id="overall-bar" style="width:0%;background:linear-gradient(90deg,#8ab4f8,#81c995)"></div>
+    </div>
+  </div>
+
+  <div class="exp-subtabs">
+    <button class="exp-stab active" data-st="dash">📊 Dashboard</button>
+    <button class="exp-stab" data-st="add">✏️ Add</button>
+    <button class="exp-stab" data-st="log">📋 Log</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="exp-body" id="st-dash">
+    <div class="sec-lbl">By Category</div>
+    <div id="cat-gauges"></div>
+    <div class="sec-lbl" style="margin-top:14px">Spending by Day</div>
+    <div class="day-bars" id="day-bars"></div>
+    <div class="sec-lbl" style="margin-top:16px">Recent</div>
+    <div id="recent-list"></div>
+  </div>
+
+  <!-- ADD -->
+  <div class="exp-body" id="st-add" style="display:none">
+
+    <!-- Receipt camera area -->
+    <div class="receipt-area" id="receipt-area">
+      <div class="receipt-placeholder" id="receipt-placeholder">
+        <div class="rp-icon">🧾</div>
+        <div class="rp-title">Got a receipt? Snap it for reference.</div>
+        <div class="rp-hint">Your phone will show the total — just read it off and type below.<br>On iPhone: tap &amp; hold any number in the photo to copy it.</div>
+      </div>
+      <img id="receipt-img" class="receipt-preview" style="display:none" alt="Receipt">
+    </div>
+
+    <!-- Camera / Gallery buttons -->
+    <div class="receipt-actions">
+      <button class="rcam-btn" onclick="document.getElementById('cam-inp').click()">
+        📷 Camera
+      </button>
+      <button class="rcam-btn" onclick="document.getElementById('gal-inp').click()">
+        🖼️ Gallery
+      </button>
+      <button class="rcam-btn" id="clear-btn" onclick="clearReceipt()" style="display:none;color:var(--fee)">
+        ✕ Clear
+      </button>
+    </div>
+    <!-- Camera input (opens rear camera on mobile) -->
+    <input type="file" id="cam-inp" accept="image/*" capture="environment" style="display:none">
+    <!-- Gallery input (opens photo library) -->
+    <input type="file" id="gal-inp" accept="image/*" style="display:none">
+
+    <div class="ios-hint" id="ios-hint">
+      💡 <strong>iPhone tip:</strong> After snapping, tap &amp; hold the total amount in the photo above — iOS will let you copy the number directly into the field below.
+    </div>
+
+    <!-- Form -->
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div>
+        <label class="field-lbl">Day</label>
+        <select id="f-day" class="field">
+          <option>Day 1 — Jul 26 (SSM)</option>
+          <option>Day 2 — Jul 27 (Marathon)</option>
+          <option>Day 3 — Jul 28 (Thunder Bay)</option>
+          <option>Day 4 — Jul 29 (Wilderness)</option>
+          <option>Day 5 — Jul 30 (Peaks)</option>
+          <option>Day 6 — Jul 31 (SSM Bound)</option>
+          <option>Day 7 — Aug 1 (Home)</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-lbl">Category</label>
+        <div class="cat-pills" id="cat-pills"></div>
+      </div>
+      <div>
+        <label class="field-lbl">Description</label>
+        <input type="text" id="f-desc" class="field" placeholder="e.g. Georgie's Shawarma — 2 plates">
+      </div>
+      <div>
+        <label class="field-lbl">Amount (CAD $)</label>
+        <input type="number" id="f-amt" class="field" placeholder="0.00" min="0" step="0.01"
+          style="color:var(--secondary);font-size:1.1rem;font-weight:bold">
+      </div>
+      <button class="add-btn" onclick="addExpense()">+ Log Expense</button>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div class="exp-body" id="st-log" style="display:none">
+    <div id="log-hdr" class="sec-lbl"></div>
+    <div id="log-list"></div>
+    <div id="log-reset" style="text-align:center;margin-top:16px;display:none">
+      <button onclick="resetAll()" style="background:none;border:1px solid #2a2a2a;color:#555;
+        padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.7rem">
+        🗑️ Reset All Expenses
+      </button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav id="bottom-nav">
+  <button class="nav-btn active" data-tab="planner"><span class="icon">🗺️</span>Planner</button>
+  <button class="nav-btn" data-tab="expenses"><span class="icon">💰</span>Expenses</button>
+</nav>
+
 <script>
-// Carrd-safe: localStorage wrapped in try/catch to prevent iframe SecurityError
-document.addEventListener('DOMContentLoaded', function() {
-    var checkboxes = document.querySelectorAll('.status-row input[type="checkbox"]');
-    var storageAvailable = false;
+// ── CONFIG ────────────────────────────────────────────────────
+const TOTAL   = 2360;
+const BUDGETS = {lodging:1200, fuel:350, food:600, parks:210, other:0};
+const CATS    = ['lodging','fuel','food','parks','other'];
+const COLORS  = {lodging:'#8ab4f8', fuel:'#ffb74d', food:'#81c995', parks:'#f28b82', other:'#c9a0f5'};
+const ICONS   = {lodging:'🏨', fuel:'⛽', food:'🍽️', parks:'🌲', other:'📦'};
+const DAYS    = [
+  'Day 1 — Jul 26 (SSM)', 'Day 2 — Jul 27 (Marathon)',
+  'Day 3 — Jul 28 (Thunder Bay)', 'Day 4 — Jul 29 (Wilderness)',
+  'Day 5 — Jul 30 (Peaks)', 'Day 6 — Jul 31 (SSM Bound)', 'Day 7 — Aug 1 (Home)'
+];
 
-    // Test if localStorage is accessible (blocked in sandboxed iframes like Carrd)
-    try {
-        localStorage.setItem('_test', '1');
-        localStorage.removeItem('_test');
-        storageAvailable = true;
-    } catch(e) {
-        storageAvailable = false;
-    }
+// ── STATE ─────────────────────────────────────────────────────
+let expenses  = [];
+let activeCat = 'food';
 
-    checkboxes.forEach(function(cb, index) {
-        var uid = 'rm_chk_' + index;
-        cb.id = uid;
+function loadExp() { try { expenses = JSON.parse(localStorage.getItem('rm_exp')||'[]'); } catch(e){ expenses=[]; } }
+function saveExp() { try { localStorage.setItem('rm_exp', JSON.stringify(expenses)); } catch(e){} }
 
-        if (storageAvailable) {
-            try {
-                if (localStorage.getItem(uid) === 'true') {
-                    cb.checked = true;
-                    cb.closest('.status-row').classList.add('checked');
-                }
-            } catch(e) {}
-        }
-
-        cb.addEventListener('change', function() {
-            if (this.checked) {
-                this.closest('.status-row').classList.add('checked');
-            } else {
-                this.closest('.status-row').classList.remove('checked');
-            }
-            if (storageAvailable) {
-                try { localStorage.setItem(uid, this.checked); } catch(e) {}
-            }
-        });
-    });
+// ── MAIN NAV ──────────────────────────────────────────────────
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab === 'expenses') renderAll();
+  });
 });
+
+// ── EXPENSE SUB-TABS ──────────────────────────────────────────
+document.querySelectorAll('.exp-stab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.exp-stab').forEach(b => b.classList.remove('active'));
+    ['dash','add','log'].forEach(id => document.getElementById('st-'+id).style.display='none');
+    btn.classList.add('active');
+    document.getElementById('st-'+btn.dataset.st).style.display = 'block';
+    renderAll();
+  });
+});
+
+// ── RECEIPT CAMERA ────────────────────────────────────────────
+function handleReceiptFile(file) {
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('receipt-img');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    document.getElementById('receipt-placeholder').style.display = 'none';
+    document.getElementById('clear-btn').style.display = 'flex';
+    document.getElementById('ios-hint').style.display = 'block';
+    // Auto-select day based on today's date
+    autoSelectDay();
+  };
+  reader.readAsDataURL(file);
+}
+
+function autoSelectDay() {
+  const today = new Date();
+  const tripStart = new Date('2025-07-26');
+  const diff = Math.floor((today - tripStart) / 86400000);
+  if(diff >= 0 && diff < 7) {
+    document.getElementById('f-day').selectedIndex = diff;
+  }
+}
+
+function clearReceipt() {
+  document.getElementById('receipt-img').style.display = 'none';
+  document.getElementById('receipt-img').src = '';
+  document.getElementById('receipt-placeholder').style.display = 'block';
+  document.getElementById('clear-btn').style.display = 'none';
+  document.getElementById('cam-inp').value = '';
+  document.getElementById('gal-inp').value = '';
+}
+
+document.getElementById('cam-inp').addEventListener('change', function(){ handleReceiptFile(this.files[0]); });
+document.getElementById('gal-inp').addEventListener('change', function(){ handleReceiptFile(this.files[0]); });
+
+// ── CATEGORY PILLS ────────────────────────────────────────────
+function renderPills() {
+  const w = document.getElementById('cat-pills');
+  w.innerHTML = '';
+  CATS.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'cat-pill';
+    b.textContent = ICONS[c] + ' ' + c;
+    const sel = c === activeCat;
+    b.style.borderColor = sel ? COLORS[c] : '#252525';
+    b.style.color       = sel ? COLORS[c] : '#444';
+    b.style.background  = sel ? COLORS[c]+'18' : 'transparent';
+    b.onclick = () => { activeCat = c; renderPills(); };
+    w.appendChild(b);
+  });
+}
+
+// ── EXPENSE CRUD ──────────────────────────────────────────────
+function addExpense() {
+  const desc = document.getElementById('f-desc').value.trim();
+  const amt  = parseFloat(document.getElementById('f-amt').value);
+  const day  = document.getElementById('f-day').value;
+  if(!desc || isNaN(amt) || amt <= 0) {
+    document.getElementById('f-amt').style.borderColor = '#ff5252';
+    setTimeout(() => document.getElementById('f-amt').style.borderColor = '#252525', 1500);
+    return;
+  }
+  expenses.unshift({
+    id: Date.now(), day, category: activeCat, description: desc, amount: amt,
+    ts: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+  });
+  saveExp();
+  // Clear form
+  document.getElementById('f-desc').value = '';
+  document.getElementById('f-amt').value  = '';
+  clearReceipt();
+  // Switch to dashboard
+  document.querySelectorAll('.exp-stab').forEach(b => b.classList.remove('active'));
+  ['dash','add','log'].forEach(id => document.getElementById('st-'+id).style.display='none');
+  document.querySelector('[data-st="dash"]').classList.add('active');
+  document.getElementById('st-dash').style.display = 'block';
+  renderAll();
+}
+
+function delExpense(id) {
+  if(!confirm('Remove this expense?')) return;
+  expenses = expenses.filter(e => e.id !== id);
+  saveExp(); renderAll();
+}
+
+function resetAll() {
+  if(!confirm('Delete ALL expenses? This cannot be undone.')) return;
+  expenses = [];
+  saveExp(); renderAll();
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function fmtC(n) { return '$' + Number(n).toFixed(2); }
+
+function renderAll() {
+  const spent = expenses.reduce((s,e) => s + e.amount, 0);
+  const rem   = TOTAL - spent;
+  const pct   = Math.min((spent / TOTAL) * 100, 100);
+
+  // Header
+  const hdrRem = document.getElementById('hdr-rem');
+  hdrRem.textContent = fmtC(Math.abs(rem)) + (rem < 0 ? ' OVER' : '');
+  hdrRem.style.color = rem < 0 ? '#ff5252' : rem < 300 ? '#ffb74d' : '#81c995';
+  document.getElementById('hdr-spent').textContent = 'Spent: ' + fmtC(spent);
+  const bar = document.getElementById('overall-bar');
+  bar.style.width      = pct + '%';
+  bar.style.background = spent > TOTAL
+    ? 'linear-gradient(90deg,#ff5252,#ff1744)'
+    : 'linear-gradient(90deg,#8ab4f8,#81c995)';
+
+  renderDash();
+  renderLog();
+}
+
+function renderDash() {
+  // Category gauges
+  const gEl = document.getElementById('cat-gauges');
+  gEl.innerHTML = '';
+  CATS.forEach(c => {
+    const sp  = expenses.filter(e => e.category === c).reduce((s,e) => s + e.amount, 0);
+    if(c === 'other' && sp === 0) return;
+    const bud  = BUDGETS[c] || (sp + 1);
+    const pct  = Math.min((sp / bud) * 100, 100);
+    const over = BUDGETS[c] > 0 && sp > BUDGETS[c];
+    gEl.innerHTML += `
+      <div class="gauge-wrap">
+        <div class="gauge-row">
+          <span style="color:${COLORS[c]}">${ICONS[c]} ${c.toUpperCase()}</span>
+          <span style="color:#e8eaed">${fmtC(sp)}${BUDGETS[c]
+            ? '<span style="color:#333"> / '+fmtC(bud)+'</span>' : ''}</span>
+        </div>
+        <div class="gauge-track">
+          <div class="gauge-fill" style="width:${pct}%;background:${over?'#ff5252':COLORS[c]}"></div>
+        </div>
+      </div>`;
+  });
+
+  // Day bars
+  const tots = DAYS.map(d => expenses.filter(e => e.day === d).reduce((s,e) => s + e.amount, 0));
+  const mx   = Math.max(...tots, 1);
+  const bEl  = document.getElementById('day-bars');
+  bEl.innerHTML = '';
+  tots.forEach((t,i) => {
+    const h = t > 0 ? Math.max((t / mx) * 50, 4) : 3;
+    bEl.innerHTML += `
+      <div class="day-bar-col">
+        <div class="day-bar" style="height:${h}px;background:${t > 0 ? '#8ab4f8' : '#1e1e1e'}"></div>
+        <div class="day-bar-lbl">D${i+1}</div>
+        ${t > 0 ? `<div class="day-bar-amt">$${Math.round(t)}</div>` : ''}
+      </div>`;
+  });
+
+  // Recent
+  const rEl = document.getElementById('recent-list');
+  if(expenses.length === 0) {
+    rEl.innerHTML = `<div class="empty">
+      <div style="font-size:2rem;margin-bottom:8px">✏️</div>
+      <div style="font-size:.78rem">No expenses yet.</div>
+      <div style="font-size:.65rem;margin-top:4px;color:#333">Tap Add to log your first one.</div>
+    </div>`;
+    return;
+  }
+  rEl.innerHTML = expenses.slice(0,3).map(e => `
+    <div class="exp-item" style="border-left:3px solid ${COLORS[e.category]}">
+      <div class="exp-info">
+        <div class="exp-desc">${ICONS[e.category]} ${e.description}</div>
+        <div class="exp-meta">${e.day.split('—')[0].trim()} · ${e.ts}</div>
+      </div>
+      <div class="exp-amt" style="color:${COLORS[e.category]}">${fmtC(e.amount)}</div>
+    </div>`).join('');
+}
+
+function renderLog() {
+  const total = expenses.reduce((s,e) => s + e.amount, 0);
+  document.getElementById('log-hdr').textContent =
+    `${expenses.length} expense${expenses.length !== 1 ? 's' : ''} · Total: ${fmtC(total)}`;
+  document.getElementById('log-reset').style.display = expenses.length > 0 ? 'block' : 'none';
+  const el = document.getElementById('log-list');
+  if(expenses.length === 0) {
+    el.innerHTML = `<div class="empty">
+      <div style="font-size:2rem;margin-bottom:8px">🧾</div>
+      <div style="font-size:.78rem">No expenses logged yet.</div>
+    </div>`;
+    return;
+  }
+  el.innerHTML = expenses.map(e => `
+    <div class="exp-item" style="border-left:3px solid ${COLORS[e.category]}">
+      <div class="exp-info">
+        <div class="exp-desc">${ICONS[e.category]} ${e.description}</div>
+        <div class="exp-meta">${e.day.split('—')[0].trim()} · ${e.ts}</div>
+      </div>
+      <div class="exp-right">
+        <div class="exp-amt" style="color:${COLORS[e.category]}">${fmtC(e.amount)}</div>
+        <button class="del-btn" onclick="delExpense(${e.id})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── PLANNER CHECKBOXES ────────────────────────────────────────
+function initCbs() {
+  document.querySelectorAll('.status-row input[type="checkbox"]').forEach((cb, i) => {
+    const k = 'rm_chk_' + i;
+    try {
+      if(localStorage.getItem(k) === 'true') {
+        cb.checked = true;
+        cb.closest('.status-row').classList.add('checked');
+      }
+    } catch(e){}
+    cb.addEventListener('change', function() {
+      this.closest('.status-row').classList.toggle('checked', this.checked);
+      try { localStorage.setItem(k, this.checked); } catch(e){}
+    });
+  });
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+loadExp(); initCbs(); renderPills(); renderAll();
 </script>
 </body>
 </html>
