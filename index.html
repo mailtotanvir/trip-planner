@@ -139,6 +139,24 @@ input[type="checkbox"]{accent-color:var(--secondary);width:16px;height:16px;marg
   padding:3px 7px;cursor:pointer;font-size:.62rem}
 .empty{text-align:center;padding:36px 20px;color:#2a2a2a;
   border:1px dashed #1a1a1a;border-radius:12px}
+.field.error{border-color:#ff5252!important}
+.field-err{font-size:.62rem;color:#ff5252;margin-top:3px;display:none}
+.field-err.show{display:block}
+/* Toast */
+#toast{position:fixed;bottom:calc(var(--nav-h) + 12px);left:50%;transform:translateX(-50%) translateY(20px);
+  background:#1e2e1e;border:1px solid var(--secondary);color:var(--secondary);
+  padding:10px 18px;border-radius:24px;font-size:.78rem;font-weight:600;
+  opacity:0;transition:all .3s ease;z-index:200;white-space:nowrap;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.field.error{border-color:#ff5252!important}
+.field-err{font-size:.62rem;color:#ff5252;margin-top:3px;display:none}
+.field-err.show{display:block}
+#toast{position:fixed;bottom:calc(var(--nav-h) + 14px);left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:#1a2e1a;border:1px solid var(--secondary);color:var(--secondary);
+  padding:10px 20px;border-radius:24px;font-size:.78rem;font-weight:600;
+  opacity:0;transition:all .3s ease;z-index:200;white-space:nowrap;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
@@ -368,11 +386,15 @@ input[type="checkbox"]{accent-color:var(--secondary);width:16px;height:16px;marg
       <div>
         <label class="field-lbl">Description</label>
         <input type="text" id="f-desc" class="field" placeholder="e.g. Georgie's Shawarma — 2 plates">
+        <div class="field-err" id="err-desc">⚠️ Please enter a description</div>
+        <div class="field-err" id="err-desc">⚠️ Please enter a description</div>
       </div>
       <div>
         <label class="field-lbl">Amount (CAD $)</label>
         <input type="number" id="f-amt" class="field" placeholder="0.00" min="0" step="0.01"
           style="color:var(--secondary);font-size:1.1rem;font-weight:bold">
+        <div class="field-err" id="err-amt">⚠️ Please enter a valid amount greater than $0</div>
+        <div class="field-err" id="err-amt">⚠️ Please enter a valid amount greater than $0</div>
       </div>
       <button class="add-btn" onclick="addExpense()">+ Log Expense</button>
     </div>
@@ -497,30 +519,58 @@ function renderPills() {
 }
 
 // ── EXPENSE CRUD ──────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+
 function addExpense() {
-  const desc = document.getElementById('f-desc').value.trim();
-  const amt  = parseFloat(document.getElementById('f-amt').value);
-  const day  = document.getElementById('f-day').value;
-  if(!desc || isNaN(amt) || amt <= 0) {
-    document.getElementById('f-amt').style.borderColor = '#ff5252';
-    setTimeout(() => document.getElementById('f-amt').style.borderColor = '#252525', 1500);
-    return;
+  const descEl = document.getElementById('f-desc');
+  const amtEl  = document.getElementById('f-amt');
+  const desc   = descEl.value.trim();
+  const amt    = parseFloat(amtEl.value);
+  const day    = document.getElementById('f-day').value;
+
+  // Clear previous error state
+  [descEl, amtEl].forEach(el => el.classList.remove('error'));
+  ['err-desc','err-amt'].forEach(id => document.getElementById(id).classList.remove('show'));
+
+  let valid = true;
+  if (!desc) {
+    descEl.classList.add('error');
+    document.getElementById('err-desc').classList.add('show');
+    descEl.focus();
+    valid = false;
   }
+  if (isNaN(amt) || amt <= 0) {
+    amtEl.classList.add('error');
+    document.getElementById('err-amt').classList.add('show');
+    if (valid) amtEl.focus();
+    valid = false;
+  }
+  if (!valid) return;
+
   expenses.unshift({
     id: Date.now(), day, category: activeCat, description: desc, amount: amt,
     ts: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
   });
   saveExp();
+
   // Clear form
-  document.getElementById('f-desc').value = '';
-  document.getElementById('f-amt').value  = '';
+  descEl.value = '';
+  amtEl.value  = '';
   clearReceipt();
+
   // Switch to dashboard
   document.querySelectorAll('.exp-stab').forEach(b => b.classList.remove('active'));
   ['dash','add','log'].forEach(id => document.getElementById('st-'+id).style.display='none');
   document.querySelector('[data-st="dash"]').classList.add('active');
   document.getElementById('st-dash').style.display = 'block';
   renderAll();
+
+  showToast('✅ Saved — $' + amt.toFixed(2) + ' logged');
 }
 
 function delExpense(id) {
@@ -662,5 +712,6 @@ function initCbs() {
 // ── INIT ──────────────────────────────────────────────────────
 loadExp(); initCbs(); renderPills(); renderAll();
 </script>
+<div id="toast"></div>
 </body>
 </html>
